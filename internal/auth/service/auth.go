@@ -3,11 +3,15 @@ package service
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/maheswaradevo/hacktiv8-finalproject3/internal/auth"
 	"github.com/maheswaradevo/hacktiv8-finalproject3/internal/dto"
+	"github.com/maheswaradevo/hacktiv8-finalproject3/internal/global/config"
 	"github.com/maheswaradevo/hacktiv8-finalproject3/internal/global/utils"
+	"github.com/maheswaradevo/hacktiv8-finalproject3/internal/model"
 	"github.com/maheswaradevo/hacktiv8-finalproject3/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -66,4 +70,46 @@ func (auth *Service) RegisterUser(ctx context.Context, data *dto.UserRegisterReq
 	}
 	user.UserID = userID
 	return dto.NewUserRegisterResponse(*user), nil
+}
+
+func (auth *Service) Login(ctx context.Context, data *dto.UserSignInRequest) (*dto.UserSignInResponse, error) {
+	userLogin := data.ToEntity()
+
+	userCred, err := auth.repo.CheckEmail(ctx, userLogin.Email)
+	if err != nil {
+		log.Printf("[Login] failed to fetch user with email: %v, err: %v", userLogin.Email, err)
+		return nil, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(userCred.Password), []byte(userLogin.Password))
+	if err != nil {
+		err = errors.ErrMismatchedHashAndPassword
+		log.Printf("[Login] wrong password, err: %v", err)
+		return nil, err
+	}
+	token, err := auth.createAccessToken(userCred)
+	if err != nil {
+		log.Printf("[Login] failed to create new token, err: %v", err)
+		return nil, err
+	}
+	return dto.NewUserSignInResponse(token), nil
+}
+
+func (auth *Service) createAccessToken(user *model.User) (string, error) {
+	cfg := config.GetConfig()
+
+	claim := jwt.MapClaims{
+		"authorized": true,
+		"exp":        time.Now().Add(time.Hour * 8).Unix(),
+		"user_id":    user.UserID,
+		"user_role":  user.Role,
+	}
+
+	token := jwt.NewWithClaims(cfg.JWT_SIGNING_METHOD, claim)
+	signedToken, err := token.SignedString([]byte(cfg.API_SECRET_KEY))
+	if err != nil {
+		log.Printf("[createAccessToken] failed to create new token, err: %v", err)
+		return "", err
+	}
+	return signedToken, nil
 }

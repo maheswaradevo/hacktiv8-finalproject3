@@ -25,8 +25,8 @@ func NewUserHandler(r *gin.RouterGroup, us auth.UserService) *gin.RouterGroup {
 	userRoute := delivery.r.Group("/users")
 	{
 		userRoute.Handle(http.MethodPost, "/register", delivery.register)
+		userRoute.Handle(http.MethodPost, "/login", delivery.login)
 	}
-
 	return userRoute
 }
 
@@ -50,4 +50,27 @@ func (u *UserHandler) register(c *gin.Context) {
 	}
 	response := utils.NewSuccessResponseWriter(c.Writer, "Registrasi Akun Berhasil", http.StatusCreated, res)
 	c.JSON(http.StatusCreated, response)
+}
+
+func (u *UserHandler) login(c *gin.Context) {
+	loginRequest := &dto.UserSignInRequest{}
+
+	err := json.NewDecoder(c.Request.Body).Decode(loginRequest)
+	if err != nil {
+		log.Printf("[login] failed to parse json data: %v", err)
+		errResponse := utils.NewErrorResponse(c.Writer, errors.ErrInvalidRequestBody)
+		c.JSON(errResponse.Code, errResponse)
+		return
+	}
+
+	res, err := u.us.Login(c, loginRequest)
+	if err != nil {
+		log.Printf("[login] user failed to login, err: %v", err)
+		errResponse := utils.NewErrorResponse(c.Writer, err)
+		c.JSON(errResponse.Code, errResponse)
+		return
+	}
+
+	response := utils.NewSuccessResponseWriter(c.Writer, "Login Sukses", http.StatusOK, res)
+	c.JSON(http.StatusOK, response)
 }
