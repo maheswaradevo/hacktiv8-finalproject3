@@ -17,6 +17,7 @@ var (
 	ErrUnauthorized       = errors.New("user is unauthorized")
 	ErrDataNotFound       = errors.New("data not found")
 	ErrDuplicateEntry     = errors.New("duplicate field entry")
+	ErrEmailFormat        = errors.New("wrong email format")
 )
 
 func NewErrorData(code int, message string) dto.ErrorData {
@@ -44,4 +45,5 @@ var errorMap = map[error]dto.ErrorData{
 	ErrUnauthorized:       NewErrorData(http.StatusUnauthorized, ErrUnauthorized.Error()),
 	ErrDataNotFound:       NewErrorData(http.StatusNotFound, ErrDataNotFound.Error()),
 	ErrDuplicateEntry:     NewErrorData(http.StatusBadRequest, ErrDuplicateEntry.Error()),
+	ErrEmailFormat:        NewErrorData(http.StatusBadRequest, ErrEmailFormat.Error()),
 }

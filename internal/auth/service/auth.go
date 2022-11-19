@@ -36,7 +36,7 @@ func (auth *Service) RegisterUser(ctx context.Context, data *dto.UserRegisterReq
 	isValid := utils.IsValidEmail(user.Email)
 
 	if !isValid {
-		err := errors.ErrInvalidRequestBody
+		err := errors.ErrEmailFormat
 		log.Printf("[RegisterUser] wrong email format, err: %v", err)
 		return nil, err
 	}
