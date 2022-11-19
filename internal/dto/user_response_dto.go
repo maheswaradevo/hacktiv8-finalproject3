@@ -13,6 +13,10 @@ type UserRegisterResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type UserSignInResponse struct {
+	AccessToken string `json:"token"`
+}
+
 func NewUserRegisterResponse(u model.User) *UserRegisterResponse {
 	return &UserRegisterResponse{
 		UserID:    u.UserID,
@@ -20,4 +24,8 @@ func NewUserRegisterResponse(u model.User) *UserRegisterResponse {
 		Email:     u.Email,
 		CreatedAt: time.Now(),
 	}
+}
+
+func NewUserSignInResponse(ac string) *UserSignInResponse {
+	return &UserSignInResponse{AccessToken: ac}
 }

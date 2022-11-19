@@ -10,12 +10,25 @@ type UserRegisterRequest struct {
 	Password string `json:"password" validate:"required,min=6"`
 }
 
+type UserSignInRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 func (dto *UserRegisterRequest) ToEntity() (u *model.User) {
 	u = &model.User{
 		FullName: dto.FullName,
 		Email:    dto.Email,
 		Password: dto.Password,
 		Role:     "Member",
+	}
+	return
+}
+
+func (dto *UserSignInRequest) ToEntity() (u *model.User) {
+	u = &model.User{
+		Email:    dto.Email,
+		Password: dto.Password,
 	}
 	return
 }
