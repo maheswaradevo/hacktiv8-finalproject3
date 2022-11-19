@@ -11,9 +11,12 @@ func NewSuccessResponseWriter(rw http.ResponseWriter, status string, code int, d
 	return BaseResponseWriter(rw, code, status, nil, data)
 }
 
-func NewErrorResponse(rw http.ResponseWriter, err error) dto.BaseResponse {
+func NewErrorResponse(rw http.ResponseWriter, err error) dto.ErrorData {
 	errMap := errors.GetErrorResponseMetaData(err)
-	return BaseResponseWriter(rw, errMap.Code, "", &dto.ErrorData{Code: errMap.Code, Message: errMap.Message}, nil)
+	return dto.ErrorData{
+		Code:    errMap.Code,
+		Message: errMap.Message,
+	}
 }
 
 func BaseResponseWriter(rw http.ResponseWriter, code int, status string, er *dto.ErrorData, data interface{}) dto.BaseResponse {
