@@ -17,6 +17,13 @@ type UserSignInResponse struct {
 	AccessToken string `json:"token"`
 }
 
+type UserUpdateAccountResponse struct {
+	UserID    uint64    `json:"id"`
+	FullName  string    `json:"full_name"`
+	Email     string    `json:"email"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 func NewUserRegisterResponse(u model.User) *UserRegisterResponse {
 	return &UserRegisterResponse{
 		UserID:    u.UserID,
@@ -28,4 +35,13 @@ func NewUserRegisterResponse(u model.User) *UserRegisterResponse {
 
 func NewUserSignInResponse(ac string) *UserSignInResponse {
 	return &UserSignInResponse{AccessToken: ac}
+}
+
+func NewUserUpdateAccount(u model.User, userID uint64) *UserUpdateAccountResponse {
+	return &UserUpdateAccountResponse{
+		UserID:    userID,
+		FullName:  u.FullName,
+		Email:     u.Email,
+		UpdatedAt: time.Now(),
+	}
 }
