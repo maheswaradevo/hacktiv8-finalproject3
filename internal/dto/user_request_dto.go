@@ -15,6 +15,11 @@ type UserSignInRequest struct {
 	Password string `json:"password"`
 }
 
+type UserUpdateAccountRequest struct {
+	FullName string `json:"ful_name"`
+	Email    string `json:"email"`
+}
+
 func (dto *UserRegisterRequest) ToEntity() (u *model.User) {
 	u = &model.User{
 		FullName: dto.FullName,
@@ -29,6 +34,14 @@ func (dto *UserSignInRequest) ToEntity() (u *model.User) {
 	u = &model.User{
 		Email:    dto.Email,
 		Password: dto.Password,
+	}
+	return
+}
+
+func (dto *UserUpdateAccountRequest) ToEntity() (u *model.User) {
+	u = &model.User{
+		FullName: dto.FullName,
+		Email:    dto.Email,
 	}
 	return
 }

@@ -19,8 +19,9 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 }
 
 var (
-	SAVE_USER   = "INSERT INTO users(full_name, email, role, password) VALUES (?, ?, ?, ?);"
-	CHECK_EMAIL = "SELECT id, full_name, email, password, role FROM users WHERE email = ?;"
+	SAVE_USER      = "INSERT INTO users(full_name, email, role, password) VALUES (?, ?, ?, ?);"
+	CHECK_EMAIL    = "SELECT id, full_name, email, password, role FROM users WHERE email = ?;"
+	UPDATE_ACCOUNT = "UPDATE users SET full_name = ?, email = ? WHERE id = ?;"
 )
 
 func (u UserRepository) Save(ctx context.Context, data model.User) (uint64, error) {
@@ -49,4 +50,15 @@ func (u UserRepository) CheckEmail(ctx context.Context, email string) (*model.Us
 		return nil, errors.ErrInvalidResources
 	}
 	return user, nil
+}
+
+func (u UserRepository) UpdateAccount(ctx context.Context, data model.User, userID uint64) error {
+	query := UPDATE_ACCOUNT
+
+	_, err := u.db.ExecContext(ctx, query, data.FullName, data.Email, userID)
+	if err != nil && err.(*mysql.MySQLError).Number == 1062 {
+		log.Printf("[UpdateAccount] failed to insert data to the database, err : %v", err)
+		return err
+	}
+	return nil
 }

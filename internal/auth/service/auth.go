@@ -95,6 +95,27 @@ func (auth *Service) Login(ctx context.Context, data *dto.UserSignInRequest) (*d
 	return dto.NewUserSignInResponse(token), nil
 }
 
+func (auth *Service) UpdateAccount(ctx context.Context, userID uint64, data *dto.UserUpdateAccountRequest) (*dto.UserUpdateAccountResponse, error) {
+	userUpdate := data.ToEntity()
+
+	exists, err := auth.repo.CheckEmail(ctx, userUpdate.Email)
+	if err != nil {
+		log.Printf("[UpdateAccount] failed to fetch email user, %v", userUpdate.Email)
+		return nil, err
+	}
+	if exists == nil {
+		err = errors.ErrDataNotFound
+		log.Printf("[UpdateAccount] data with userID %v not found", userID)
+		return nil, err
+	}
+
+	userID, err = auth.repo.UpdateAccount(ctx, *userUpdate, userID)
+	if err != nil {
+		log.Printf("[UpdateAccount] failed to update user")
+	}
+	return dto.NewUserUpdateAccount(*userUpdate, userID), nil
+}
+
 func (auth *Service) createAccessToken(user *model.User) (string, error) {
 	cfg := config.GetConfig()
 
