@@ -10,6 +10,10 @@ import (
 	authHandler "github.com/maheswaradevo/hacktiv8-finalproject3/internal/auth/handler"
 	authRepository "github.com/maheswaradevo/hacktiv8-finalproject3/internal/auth/repository"
 	authService "github.com/maheswaradevo/hacktiv8-finalproject3/internal/auth/service"
+
+	taskHandler "github.com/maheswaradevo/hacktiv8-finalproject3/internal/task/handler"
+	taskRepository "github.com/maheswaradevo/hacktiv8-finalproject3/internal/task/repository"
+	taskService "github.com/maheswaradevo/hacktiv8-finalproject3/internal/task/service"
 )
 
 func Init(router *gin.Engine, db *sql.DB) {
@@ -18,6 +22,8 @@ func Init(router *gin.Engine, db *sql.DB) {
 		InitPingModule(api)
 
 		InitAuthModule(api, db)
+
+		InitTaskModule(api, db)
 	}
 }
 
@@ -30,4 +36,10 @@ func InitAuthModule(routerGroup *gin.RouterGroup, db *sql.DB) *gin.RouterGroup {
 	authReposiory := authRepository.NewUserRepository(db)
 	authService := authService.NewAuthService(authReposiory)
 	return authHandler.NewUserHandler(routerGroup, authService)
+}
+
+func InitTaskModule(routerGroup *gin.RouterGroup, db *sql.DB) *gin.RouterGroup {
+	taskRepository := taskRepository.ProvideTaskRepository(db)
+	taskService := taskService.ProvideTaskService(taskRepository)
+	return taskHandler.NewTaskHandler(routerGroup, taskService)
 }
