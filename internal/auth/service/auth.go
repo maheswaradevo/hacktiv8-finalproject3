@@ -109,7 +109,7 @@ func (auth *Service) UpdateAccount(ctx context.Context, userID uint64, data *dto
 		return nil, err
 	}
 
-	userID, err = auth.repo.UpdateAccount(ctx, *userUpdate, userID)
+	err = auth.repo.UpdateAccount(ctx, *userUpdate, userID)
 	if err != nil {
 		log.Printf("[UpdateAccount] failed to update user")
 	}
