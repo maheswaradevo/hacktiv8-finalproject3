@@ -31,6 +31,7 @@ func NewTaskHandler(r *gin.RouterGroup, ts task.TaskService) *gin.RouterGroup {
 		taskProtectedRoute.Handle(http.MethodGet, "/", delivery.viewTask)
 		taskProtectedRoute.Handle(http.MethodPatch, "/:taskId", delivery.updateTaskStatus)
 		taskProtectedRoute.Handle(http.MethodPatch, "/update-category/:taskId", delivery.updateTaskCategory)
+		taskProtectedRoute.Handle(http.MethodPatch, "update-status/:taskId", delivery.updateTaskStatus)
 		taskProtectedRoute.Handle(http.MethodDelete, "/:taskId", delivery.deleteTask)
 	}
 	return taskRoute
