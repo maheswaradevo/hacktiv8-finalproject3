@@ -17,6 +17,20 @@ func (dto *CreateTaskRequest) ToTaskEntity() (cmt *model.Task) {
 	return
 }
 
+type EditTaskRequest struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
+func (dto *EditTaskRequest) ToTaskEntity() *model.TaskUserJoined {
+	return &model.TaskUserJoined{
+		Task: model.Task{
+			Title:       dto.Title,
+			Description: dto.Description,
+		},
+	}
+}
+
 type EditTaskStatusRequest struct {
 	Status bool `json:"status"`
 }

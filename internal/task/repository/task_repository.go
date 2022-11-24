@@ -25,6 +25,7 @@ var (
 	VIEW_TASK            = "SELECT t.id, t.title, t.description, t.status, t.category_id, t.user_id, t.created_at, t.updated_at, u.email, u.full_name FROM tasks t JOIN `users` u ON u.id = t.user_id  ORDER BY t.created_at DESC;"
 	COUNT_TASK           = "SELECT COUNT(*) FROM tasks;"
 	CHECK_TASK           = "SELECT id FROM tasks WHERE id = ? AND user_id = ?;"
+	UPDATE_TASK          = "UPDATE tasks SET title = ?, description = ? WHERE id = ?;"
 	UPDATE_TASK_STATUS   = "UPDATE tasks SET status = ? WHERE id = ?;"
 	UPDATE_TASK_CATEGORY = "UPDATE tasks SET category_id = ? WHERE id = ?;"
 	DELETE_TASK          = "DELETE FROM tasks WHERE id = ? AND user_id = ?;"
@@ -134,6 +135,22 @@ func (tsk TaskImplRepo) CheckTask(ctx context.Context, taskID uint64, userID uin
 		return true, nil
 	}
 	return false, nil
+}
+
+func (tsk TaskImplRepo) UpdateTask(ctx context.Context, reqData model.TaskUserJoined, taskID uint64, userID uint64) error {
+	query := UPDATE_TASK
+
+	stmt, err := tsk.db.PrepareContext(ctx, query)
+	if err != nil {
+		log.Printf("[UpdateTaskStatus] failed to prepare the statement, err: %v", err)
+		return err
+	}
+	_, err = stmt.ExecContext(ctx, reqData.Task.Title, reqData.Task.Description, taskID)
+	if err != nil {
+		log.Printf("[UpdateTaskStatus] failed to store data to the database, err: %v", err)
+		return err
+	}
+	return nil
 }
 
 func (tsk TaskImplRepo) UpdateTaskStatus(ctx context.Context, reqData model.TaskUserJoined, taskID uint64, userID uint64) error {

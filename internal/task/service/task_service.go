@@ -58,6 +58,32 @@ func (tsk *TaskServiceImpl) ViewTask(ctx context.Context) (dto.ViewTasksResponse
 	return dto.NewViewTasksResponse(res), nil
 }
 
+func (tsk *TaskServiceImpl) UpdateTask(ctx context.Context, taskID uint64, userID uint64, data *dto.EditTaskRequest) (*dto.EditTaskStatusResponse, error) {
+	editedTask := data.ToTaskEntity()
+
+	check, err := tsk.repo.CheckTask(ctx, taskID, userID)
+	if err != nil {
+		log.Printf("[UpdateTaskStatus] failed to check task with, userID: %v, err: %v", userID, err)
+		return nil, err
+	}
+	if !check {
+		err = errors.ErrDataNotFound
+		log.Printf("[UpdateTaskStatus] no task in userID: %v", userID)
+		return nil, err
+	}
+	err = tsk.repo.UpdateTask(ctx, *editedTask, taskID, userID)
+	if err != nil {
+		log.Printf("[UpdateTaskStatus] failed to update task status, err: %v", err)
+		return nil, err
+	}
+	task, err := tsk.repo.GetTaskByID(ctx, taskID, userID)
+	if err != nil {
+		log.Printf("[UpdateTaskStatus] failed to get task, err: %v", err)
+		return nil, err
+	}
+	return task, nil
+}
+
 func (tsk *TaskServiceImpl) UpdateTaskStatus(ctx context.Context, taskID uint64, userID uint64, data *dto.EditTaskStatusRequest) (*dto.EditTaskStatusResponse, error) {
 	editedTaskStatus := data.ToTaskEntity()
 
