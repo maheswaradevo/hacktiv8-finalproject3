@@ -23,7 +23,8 @@ var (
 	CHECK_CATEGORY = "SELECT id FROM categories;"
 	VIEW_TASK      = "SELECT t.id, t.title, t.description, t.status, t.category_id, t.user_id, t.created_at, t.updated_at, u.email, u.full_name FROM tasks t JOIN `users` u ON u.id = t.user_id  ORDER BY t.created_at DESC;"
 	COUNT_TASK     = "SELECT COUNT(*) FROM tasks;"
-	CHECK_TASK     = "SELECT id FROM tasks WHERE user_id = ?;"
+	CHECK_TASK     = "SELECT id FROM tasks WHERE id = ? AND user_id = ?;"
+	DELETE_TASK    = "DELETE FROM tasks WHERE id = ? AND user_id = ?;"
 )
 
 func (tsk TaskImplRepo) CreateTask(ctx context.Context, data model.Task) (taskID uint64, err error) {
@@ -37,7 +38,7 @@ func (tsk TaskImplRepo) CreateTask(ctx context.Context, data model.Task) (taskID
 
 	res, err := stmt.ExecContext(ctx, data.UserID, data.CategoryID, data.Title, data.Description)
 	if err != nil {
-		log.Printf("[CreateComment] failed to insert user to the database: %v", err)
+		log.Printf("[CreateTask] failed to insert user to the database: %v", err)
 		return
 	}
 
@@ -113,14 +114,14 @@ func (tsk TaskImplRepo) CountTask(ctx context.Context) (int, error) {
 	return count, nil
 }
 
-func (tsk TaskImplRepo) CheckTask(ctx context.Context, userID uint64) (bool, error) {
+func (tsk TaskImplRepo) CheckTask(ctx context.Context, taskID uint64, userID uint64) (bool, error) {
 	query := CHECK_TASK
 	stmt, err := tsk.db.PrepareContext(ctx, query)
 	if err != nil {
 		log.Printf("[CheckTask] failed to prepare the statement, err: %v", err)
 		return false, err
 	}
-	rows, err := stmt.QueryContext(ctx, userID)
+	rows, err := stmt.QueryContext(ctx, taskID, userID)
 	if err != nil {
 		log.Printf("[CheckTask] failed to query to the database, err: %v", err)
 		return false, err
@@ -129,4 +130,21 @@ func (tsk TaskImplRepo) CheckTask(ctx context.Context, userID uint64) (bool, err
 		return true, nil
 	}
 	return false, nil
+}
+
+func (tsk TaskImplRepo) DeleteTask(ctx context.Context, taskID uint64, userID uint64) error {
+	query := DELETE_TASK
+
+	stmt, err := tsk.db.PrepareContext(ctx, query)
+	if err != nil {
+		log.Printf("[DeleteTask] failed to prepare the statement, err: %v", err)
+		return err
+	}
+
+	_, err = stmt.QueryContext(ctx, taskID, userID)
+	if err != nil {
+		log.Printf("[DeleteTask] failed to delete the task, err: %v", err)
+		return err
+	}
+	return nil
 }

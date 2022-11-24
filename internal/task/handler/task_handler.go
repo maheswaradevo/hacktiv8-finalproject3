@@ -3,6 +3,7 @@ package handler
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -28,6 +29,7 @@ func NewTaskHandler(r *gin.RouterGroup, ts task.TaskService) *gin.RouterGroup {
 	{
 		taskProtectedRoute.Handle(http.MethodPost, "/", delivery.createTask)
 		taskProtectedRoute.Handle(http.MethodGet, "/", delivery.viewTask)
+		taskProtectedRoute.Handle(http.MethodDelete, "/:taskId", delivery.deleteTask)
 	}
 	return taskRoute
 }
@@ -45,7 +47,7 @@ func (cmth *TaskHandler) createTask(c *gin.Context) {
 
 	res, err := cmth.ts.CreateTask(c, &requestBody, userID)
 	if err != nil {
-		log.Printf("[createComment] failed to create user, err: %v", err)
+		log.Printf("[createTask] failed to create user, err: %v", err)
 		errResponse := utils.NewErrorResponse(c.Writer, err)
 		c.JSON(errResponse.Code, errResponse)
 	}
@@ -62,5 +64,22 @@ func (cmth *TaskHandler) viewTask(c *gin.Context) {
 		return
 	}
 	response := utils.NewSuccessResponseWriter(c.Writer, "SUCCESS", http.StatusOK, res)
+	c.JSON(http.StatusOK, response)
+}
+
+func (cmth *TaskHandler) deleteTask(c *gin.Context) {
+	userData := c.MustGet("userData").(jwt.MapClaims)
+	userID := uint64(userData["user_id"].(float64))
+	taskID := c.Param("taskId")
+	taskIDConv, _ := strconv.ParseUint(taskID, 10, 64)
+
+	res, err := cmth.ts.DeleteTask(c, taskIDConv, userID)
+	if err != nil {
+		log.Printf("[deleteTask] failed to delete task, id: %v, err: %v", taskID, err)
+		errResponse := utils.NewErrorResponse(c.Writer, err)
+		c.JSON(errResponse.Code, errResponse)
+		return
+	}
+	response := utils.NewSuccessResponseWriter(c.Writer, "SUCCESS", http.StatusCreated, res)
 	c.JSON(http.StatusOK, response)
 }

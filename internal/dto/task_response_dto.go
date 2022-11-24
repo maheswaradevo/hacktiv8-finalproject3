@@ -35,6 +35,10 @@ type ViewTaskUserResponse struct {
 
 type ViewTasksResponse []*ViewTaskResponse
 
+type DeleteTaskResponse struct {
+	Message string `json:"message"`
+}
+
 func NewTaskCreateResponse(tsk model.Task, userID uint64, taskID uint64) *CreateTaskResponse {
 	return &CreateTaskResponse{
 		TaskID:      taskID,
@@ -71,4 +75,10 @@ func NewViewTasksResponse(tsk model.PeopleTaskJoined) ViewTasksResponse {
 		viewTasksResponse = append(viewTasksResponse, peopleTask)
 	}
 	return viewTasksResponse
+}
+
+func NewDeleteTaskResponse(message string) *DeleteTaskResponse {
+	return &DeleteTaskResponse{
+		Message: message,
+	}
 }
