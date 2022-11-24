@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/maheswaradevo/hacktiv8-finalproject3/internal/model"
+	"github.com/maheswaradevo/hacktiv8-finalproject3/internal/dto"
 )
 
 type TaskImplRepo struct {
@@ -19,12 +20,14 @@ func ProvideTaskRepository(db *sql.DB) *TaskImplRepo {
 }
 
 var (
-	CREATE_TASK    = "INSERT INTO `tasks`(user_id, category_id, title, description) VALUES (?, ?, ?, ?);"
-	CHECK_CATEGORY = "SELECT id FROM categories;"
-	VIEW_TASK      = "SELECT t.id, t.title, t.description, t.status, t.category_id, t.user_id, t.created_at, t.updated_at, u.email, u.full_name FROM tasks t JOIN `users` u ON u.id = t.user_id  ORDER BY t.created_at DESC;"
-	COUNT_TASK     = "SELECT COUNT(*) FROM tasks;"
-	CHECK_TASK     = "SELECT id FROM tasks WHERE id = ? AND user_id = ?;"
-	DELETE_TASK    = "DELETE FROM tasks WHERE id = ? AND user_id = ?;"
+	CREATE_TASK        = "INSERT INTO `tasks`(user_id, category_id, title, description) VALUES (?, ?, ?, ?);"
+	CHECK_CATEGORY     = "SELECT id FROM categories;"
+	VIEW_TASK          = "SELECT t.id, t.title, t.description, t.status, t.category_id, t.user_id, t.created_at, t.updated_at, u.email, u.full_name FROM tasks t JOIN `users` u ON u.id = t.user_id  ORDER BY t.created_at DESC;"
+	COUNT_TASK         = "SELECT COUNT(*) FROM tasks;"
+	CHECK_TASK         = "SELECT id FROM tasks WHERE id = ? AND user_id = ?;"
+	UPDATE_TASK_STATUS = "UPDATE tasks SET status = ? WHERE id = ?;"
+	DELETE_TASK        = "DELETE FROM tasks WHERE id = ? AND user_id = ?;"
+	GET_TASK_BY_ID     = "SELECT t.id, t.title, t.description, t.status, t.category_id, t.updated_at FROM `tasks` t WHERE t.id = ? AND t.user_id = ?;"
 )
 
 func (tsk TaskImplRepo) CreateTask(ctx context.Context, data model.Task) (taskID uint64, err error) {
@@ -130,6 +133,50 @@ func (tsk TaskImplRepo) CheckTask(ctx context.Context, taskID uint64, userID uin
 		return true, nil
 	}
 	return false, nil
+}
+
+func (tsk TaskImplRepo) UpdateTaskStatus(ctx context.Context, reqData model.TaskUserJoined, taskID uint64, userID uint64) error {
+	query := UPDATE_TASK_STATUS
+
+	stmt, err := tsk.db.PrepareContext(ctx, query)
+	if err != nil {
+		log.Printf("[UpdateTaskStatus] failed to prepare the statement, err: %v", err)
+		return err
+	}
+	_, err = stmt.ExecContext(ctx, reqData.Task.Status, taskID)
+	if err != nil {
+		log.Printf("[UpdateTaskStatus] failed to store data to the database, err: %v", err)
+		return err
+	}
+	return nil
+}
+
+func (tsk TaskImplRepo) GetTaskByID(ctx context.Context, taskID uint64, userID uint64) (*dto.EditTaskStatusResponse, error) {
+	query := GET_TASK_BY_ID
+	stmt, err := tsk.db.PrepareContext(ctx, query)
+	if err != nil {
+		log.Printf("[GetTaskByID] failed to prepare the statement, err: %v", err)
+		return nil, err
+	}
+	rows := stmt.QueryRowContext(ctx, taskID, userID)
+	if err != nil {
+		log.Printf("[GetTaskByID] failed to query to the database, err: %v", err)
+		return nil, err
+	}
+	personTask := model.TaskUserJoined{}
+	err = rows.Scan(
+		&personTask.Task.TaskID,
+		&personTask.Task.Title,
+		&personTask.Task.Description,
+		&personTask.Task.Status,
+		&personTask.Task.CategoryID,
+		&personTask.Task.UpdatedAt,
+	)
+	if err != nil {
+		log.Printf("[GetPhotoByID] failed to scan the data from the database, err: %v", err)
+		return nil, err
+	}
+	return dto.NewEditTaskResponse(personTask.Task, userID), err
 }
 
 func (tsk TaskImplRepo) DeleteTask(ctx context.Context, taskID uint64, userID uint64) error {

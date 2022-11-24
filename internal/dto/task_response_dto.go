@@ -35,6 +35,16 @@ type ViewTaskUserResponse struct {
 
 type ViewTasksResponse []*ViewTaskResponse
 
+type EditTaskStatusResponse struct {
+	TaskID      uint64    `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Status      bool      `json:"status"`
+	CategoryID  uint64    `json:"category_id"`
+	UserID      uint64    `json:"user_id"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
 type DeleteTaskResponse struct {
 	Message string `json:"message"`
 }
@@ -75,6 +85,17 @@ func NewViewTasksResponse(tsk model.PeopleTaskJoined) ViewTasksResponse {
 		viewTasksResponse = append(viewTasksResponse, peopleTask)
 	}
 	return viewTasksResponse
+}
+
+func NewEditTaskResponse(tsk model.Task, userID uint64) *EditTaskStatusResponse {
+	return &EditTaskStatusResponse{
+		TaskID:      tsk.TaskID,
+		Title:       tsk.Title,
+		Description: tsk.Description,
+		Status:      tsk.Status,
+		UserID:      userID,
+		UpdatedAt:   time.Now(),
+	}
 }
 
 func NewDeleteTaskResponse(message string) *DeleteTaskResponse {
