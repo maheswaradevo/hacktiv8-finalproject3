@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/maheswaradevo/hacktiv8-finalproject3/internal/model"
 	"github.com/maheswaradevo/hacktiv8-finalproject3/internal/dto"
+	"github.com/maheswaradevo/hacktiv8-finalproject3/internal/model"
 )
 
 type TaskImplRepo struct {
@@ -20,14 +20,15 @@ func ProvideTaskRepository(db *sql.DB) *TaskImplRepo {
 }
 
 var (
-	CREATE_TASK        = "INSERT INTO `tasks`(user_id, category_id, title, description) VALUES (?, ?, ?, ?);"
-	CHECK_CATEGORY     = "SELECT id FROM categories;"
-	VIEW_TASK          = "SELECT t.id, t.title, t.description, t.status, t.category_id, t.user_id, t.created_at, t.updated_at, u.email, u.full_name FROM tasks t JOIN `users` u ON u.id = t.user_id  ORDER BY t.created_at DESC;"
-	COUNT_TASK         = "SELECT COUNT(*) FROM tasks;"
-	CHECK_TASK         = "SELECT id FROM tasks WHERE id = ? AND user_id = ?;"
-	UPDATE_TASK_STATUS = "UPDATE tasks SET status = ? WHERE id = ?;"
-	DELETE_TASK        = "DELETE FROM tasks WHERE id = ? AND user_id = ?;"
-	GET_TASK_BY_ID     = "SELECT t.id, t.title, t.description, t.status, t.category_id, t.updated_at FROM `tasks` t WHERE t.id = ? AND t.user_id = ?;"
+	CREATE_TASK          = "INSERT INTO `tasks`(user_id, category_id, title, description) VALUES (?, ?, ?, ?);"
+	CHECK_CATEGORY       = "SELECT id FROM categories;"
+	VIEW_TASK            = "SELECT t.id, t.title, t.description, t.status, t.category_id, t.user_id, t.created_at, t.updated_at, u.email, u.full_name FROM tasks t JOIN `users` u ON u.id = t.user_id  ORDER BY t.created_at DESC;"
+	COUNT_TASK           = "SELECT COUNT(*) FROM tasks;"
+	CHECK_TASK           = "SELECT id FROM tasks WHERE id = ? AND user_id = ?;"
+	UPDATE_TASK_STATUS   = "UPDATE tasks SET status = ? WHERE id = ?;"
+	UPDATE_TASK_CATEGORY = "UPDATE tasks SET category_id = ? WHERE id = ?;"
+	DELETE_TASK          = "DELETE FROM tasks WHERE id = ? AND user_id = ?;"
+	GET_TASK_BY_ID       = "SELECT t.id, t.title, t.description, t.status, t.category_id, t.updated_at FROM `tasks` t WHERE t.id = ? AND t.user_id = ?;"
 )
 
 func (tsk TaskImplRepo) CreateTask(ctx context.Context, data model.Task) (taskID uint64, err error) {
@@ -144,6 +145,22 @@ func (tsk TaskImplRepo) UpdateTaskStatus(ctx context.Context, reqData model.Task
 		return err
 	}
 	_, err = stmt.ExecContext(ctx, reqData.Task.Status, taskID)
+	if err != nil {
+		log.Printf("[UpdateTaskStatus] failed to store data to the database, err: %v", err)
+		return err
+	}
+	return nil
+}
+
+func (tsk TaskImplRepo) UpdateTaskCategory(ctx context.Context, reqData model.TaskUserJoined, taskID uint64, userID uint64) error {
+	query := UPDATE_TASK_CATEGORY
+
+	stmt, err := tsk.db.PrepareContext(ctx, query)
+	if err != nil {
+		log.Printf("[UpdateTaskStatus] failed to prepare the statement, err: %v", err)
+		return err
+	}
+	_, err = stmt.ExecContext(ctx, reqData.Task.CategoryID, taskID)
 	if err != nil {
 		log.Printf("[UpdateTaskStatus] failed to store data to the database, err: %v", err)
 		return err
