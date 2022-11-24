@@ -8,7 +8,7 @@ type Task struct {
 	CategoryID  uint64    `db:"category_id"`
 	Title       string    `db:"title"`
 	Description string    `db:"description"`
-	Status      string    `db:"status"`
+	Status      bool      `db:"status"`
 	CreatedAt   time.Time `db:"created_at"`
 	UpdatedAt   time.Time `db:"updated_at"`
 }

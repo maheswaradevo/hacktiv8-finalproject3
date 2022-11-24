@@ -19,8 +19,10 @@ func ProvideTaskRepository(db *sql.DB) *TaskImplRepo {
 }
 
 var (
-	CREATE_TASK = "INSERT INTO `tasks`(user_id, category_id, title, description) VALUES (?, ?, ?, ?);"
-	CHECK_CATEGORY   = "SELECT id FROM categories;"
+	CREATE_TASK    = "INSERT INTO `tasks`(user_id, category_id, title, description) VALUES (?, ?, ?, ?);"
+	CHECK_CATEGORY = "SELECT id FROM categories;"
+	VIEW_TASK      = "SELECT t.id, t.title, t.description, t.status, t.created_at, t.updated_at, u.id, u.email, u.full_name, c.id FROM tasks t INNER JOIN `users` u ON u.id = t.user_id  INNER JOIN `categories` c ON c.id = t.category_id ORDER BY t.created_at DESC;"
+	COUNT_TASK     = "SELECT COUNT(*) FROM tasks;"
 )
 
 func (tsk TaskImplRepo) CreateTask(ctx context.Context, data model.Task) (taskID uint64, err error) {
@@ -60,4 +62,52 @@ func (tsk TaskImplRepo) CheckTask(ctx context.Context, categoryID uint64) (bool,
 		return true, nil
 	}
 	return false, nil
+}
+
+func (tsk TaskImplRepo) ViewTask(ctx context.Context) (model.PeopleTaskJoined, error) {
+	query := VIEW_TASK
+	stmt, err := tsk.db.PrepareContext(ctx, query)
+	if err != nil {
+		log.Printf("[ViewPhoto] failed to prepare the statement, err: %v", err)
+		return nil, err
+	}
+	rows, err := stmt.QueryContext(ctx)
+	if err != nil {
+		log.Printf("[ViewPhoto] failed to query to the database, err: %v", err)
+		return nil, err
+	}
+	var peopleTask model.PeopleTaskJoined
+	for rows.Next() {
+		personTask := model.TaskUserJoined{}
+		err := rows.Scan(
+			&personTask.Task.TaskID,
+			&personTask.Task.Title,
+			&personTask.Task.Description,
+			&personTask.Task.Status,
+			&personTask.Task.CategoryID,
+			&personTask.Task.UserID,
+			&personTask.Task.UpdatedAt,
+			&personTask.Task.CreatedAt,
+			&personTask.User.Email,
+			&personTask.User.FullName,
+		)
+		if err != nil {
+			log.Printf("[ViewComment] failed to scan the data from the database, err: %v", err)
+			return nil, err
+		}
+		peopleTask = append(peopleTask, &personTask)
+	}
+	return peopleTask, nil
+}
+
+func (tsk TaskImplRepo) CountTask(ctx context.Context) (int, error) {
+	query := COUNT_TASK
+	rows := tsk.db.QueryRowContext(ctx, query)
+	var count int
+	err := rows.Scan(&count)
+	if err != nil {
+		log.Printf("[CountTask] failed to scan the data from the database, err: %v", err)
+		return 0, err
+	}
+	return count, nil
 }
