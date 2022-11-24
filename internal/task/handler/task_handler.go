@@ -84,7 +84,7 @@ func (cmth *TaskHandler) updateTaskStatus(c *gin.Context) {
 
 	res, err := cmth.ts.UpdateTaskStatus(c, TaskIDConv, userID, &data)
 	if err != nil {
-		log.Printf("[updateComment] failed to update comment, id: %v, err: %v", TaskIDConv, err)
+		log.Printf("[updateTask] failed to update task, id: %v, err: %v", TaskIDConv, err)
 		errResponse := utils.NewErrorResponse(c.Writer, err)
 		c.JSON(errResponse.Code, errResponse)
 		return

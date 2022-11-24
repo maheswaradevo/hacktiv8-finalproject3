@@ -68,7 +68,7 @@ func (tsk *TaskServiceImpl) UpdateTaskStatus(ctx context.Context, taskID uint64,
 	}
 	if !check {
 		err = errors.ErrDataNotFound
-		log.Printf("[UpdateTaskStatus] no comment in userID: %v", userID)
+		log.Printf("[UpdateTaskStatus] no task in userID: %v", userID)
 		return nil, err
 	}
 	err = tsk.repo.UpdateTaskStatus(ctx, *editedTaskStatus, taskID, userID)

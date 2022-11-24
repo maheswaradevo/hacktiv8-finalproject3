@@ -173,7 +173,7 @@ func (tsk TaskImplRepo) GetTaskByID(ctx context.Context, taskID uint64, userID u
 		&personTask.Task.UpdatedAt,
 	)
 	if err != nil {
-		log.Printf("[GetPhotoByID] failed to scan the data from the database, err: %v", err)
+		log.Printf("[GetTaskByID] failed to scan the data from the database, err: %v", err)
 		return nil, err
 	}
 	return dto.NewEditTaskResponse(personTask.Task, userID), err
