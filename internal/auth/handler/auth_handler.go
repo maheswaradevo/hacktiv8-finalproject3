@@ -116,6 +116,7 @@ func (u *UserHandler) deleteAccount(c *gin.Context) {
 		log.Printf("[deleteAccount] failed to delete account, err: %v", err)
 		errResponse := utils.NewErrorResponse(c.Writer, err)
 		c.JSON(errResponse.Code, errResponse)
+		return
 	}
 	response := utils.NewSuccessResponseWriter(c.Writer, "Delete Account Sukses", http.StatusOK, res)
 	c.JSON(http.StatusOK, response)

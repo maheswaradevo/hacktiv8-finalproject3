@@ -23,7 +23,7 @@ var (
 	CHECK_EMAIL     = "SELECT id, full_name, email, password, role FROM users WHERE email = ?;"
 	UPDATE_ACCOUNT  = "UPDATE users SET full_name = ?, email = ? WHERE id = ?;"
 	DELETE_ACCOUNT  = "DELETE FROM users WHERE id = ?;"
-	FIND_USER_BY_ID = "SELECT id, full_name, email FROM users WHERE id = ?;"
+	FIND_USER_BY_ID = "SELECT id FROM users WHERE id = ?;"
 )
 
 func (u UserRepository) Save(ctx context.Context, data model.User) (uint64, error) {
@@ -65,30 +65,29 @@ func (u UserRepository) UpdateAccount(ctx context.Context, data model.User, user
 	return nil
 }
 
-func (u UserRepository) DeleteAccount(ctx context.Context, userID uint64) error {
+func (u UserRepository) DeleteAccount(ctx context.Context, userID uint64) (string, error) {
 	query := DELETE_ACCOUNT
 
 	_, err := u.db.ExecContext(ctx, query, userID)
 	if err != nil {
 		log.Printf("[DeleteAccount] failed to delete data from the database, err : %v", err)
-		return err
+		return "", err
 	}
-	return nil
+	msg := "Your account has been successfully deleted"
+	return msg, nil
 }
 
-func (u UserRepository) FindUserByID(ctx context.Context, userID uint64) (*model.User, error) {
+func (u UserRepository) FindUserByID(ctx context.Context, userID uint64) (bool, error) {
 	query := FIND_USER_BY_ID
 
-	res := u.db.QueryRowContext(ctx, query, userID)
-	user := &model.User{}
-
-	err := res.Scan(&user.UserID, &user.FullName, &user.Email)
-	if err != nil && err != sql.ErrNoRows {
-		log.Printf("[FindUserByID] failed to scan the data: %v", err)
-		return nil, err
-	} else if err == sql.ErrNoRows {
-		log.Printf("[FindUserByID] no data exist in the database\n")
-		return nil, errors.ErrInvalidResources
+	res, err := u.db.QueryContext(ctx, query, userID)
+	if err != nil {
+		log.Printf("[FindUserByID] failed to query to the database, err: %v", err)
+		return false, err
 	}
-	return user, nil
+
+	for res.Next() {
+		return true, nil
+	}
+	return false, err
 }
