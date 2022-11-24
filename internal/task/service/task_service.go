@@ -84,6 +84,32 @@ func (tsk *TaskServiceImpl) UpdateTaskStatus(ctx context.Context, taskID uint64,
 	return task, nil
 }
 
+func (tsk *TaskServiceImpl) UpdateTaskCategory(ctx context.Context, taskID uint64, userID uint64, data *dto.EditTaskCategoryRequest) (*dto.EditTaskStatusResponse, error) {
+	editedTaskCategory := data.ToTaskEntity()
+
+	check, err := tsk.repo.CheckTask(ctx, taskID, userID)
+	if err != nil {
+		log.Printf("[UpdateTaskStatus] failed to check task with, userID: %v, err: %v", userID, err)
+		return nil, err
+	}
+	if !check {
+		err = errors.ErrDataNotFound
+		log.Printf("[UpdateTaskStatus] no task in userID: %v", userID)
+		return nil, err
+	}
+	err = tsk.repo.UpdateTaskCategory(ctx, *editedTaskCategory, taskID, userID)
+	if err != nil {
+		log.Printf("[UpdateTaskStatus] failed to update task status, err: %v", err)
+		return nil, err
+	}
+	task, err := tsk.repo.GetTaskByID(ctx, taskID, userID)
+	if err != nil {
+		log.Printf("[UpdateTaskStatus] failed to get task, err: %v", err)
+		return nil, err
+	}
+	return task, nil
+}
+
 func (tsk *TaskServiceImpl) DeleteTask(ctx context.Context, taskID uint64, userID uint64) (*dto.DeleteTaskResponse, error) {
 	check, err := tsk.repo.CheckTask(ctx, taskID, userID)
 	if err != nil {

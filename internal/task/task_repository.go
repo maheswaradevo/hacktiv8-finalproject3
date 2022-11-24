@@ -14,6 +14,7 @@ type TaskRepository interface {
 	CountTask(ctx context.Context) (int, error)
 	CheckTask(ctx context.Context, taskID uint64, userID uint64) (bool, error)
 	UpdateTaskStatus(ctx context.Context, reqData model.TaskUserJoined, taskID uint64, userID uint64) error
+	UpdateTaskCategory(ctx context.Context, reqData model.TaskUserJoined, taskID uint64, userID uint64) error
 	DeleteTask(ctx context.Context, taskID uint64, userID uint64) error
 	GetTaskByID(ctx context.Context, taskID uint64, userID uint64) (*dto.EditTaskStatusResponse, error)
 }

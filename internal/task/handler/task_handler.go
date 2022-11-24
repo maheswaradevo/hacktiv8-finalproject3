@@ -29,6 +29,8 @@ func NewTaskHandler(r *gin.RouterGroup, ts task.TaskService) *gin.RouterGroup {
 	{
 		taskProtectedRoute.Handle(http.MethodPost, "/", delivery.createTask)
 		taskProtectedRoute.Handle(http.MethodGet, "/", delivery.viewTask)
+		taskProtectedRoute.Handle(http.MethodPatch, "/:taskId", delivery.updateTaskStatus)
+		taskProtectedRoute.Handle(http.MethodPatch, "/update-category/:taskId", delivery.updateTaskCategory)
 		taskProtectedRoute.Handle(http.MethodPatch, "update-status/:taskId", delivery.updateTaskStatus)
 		taskProtectedRoute.Handle(http.MethodDelete, "/:taskId", delivery.deleteTask)
 	}
@@ -83,6 +85,31 @@ func (cmth *TaskHandler) updateTaskStatus(c *gin.Context) {
 	TaskIDConv, _ := strconv.ParseUint(taskID, 10, 64)
 
 	res, err := cmth.ts.UpdateTaskStatus(c, TaskIDConv, userID, &data)
+	if err != nil {
+		log.Printf("[updateTask] failed to update task, id: %v, err: %v", TaskIDConv, err)
+		errResponse := utils.NewErrorResponse(c.Writer, err)
+		c.JSON(errResponse.Code, errResponse)
+		return
+	}
+	response := utils.NewSuccessResponseWriter(c.Writer, "SUCCESS", http.StatusOK, res)
+	c.JSON(http.StatusOK, response)
+}
+
+func (cmth *TaskHandler) updateTaskCategory(c *gin.Context) {
+	data := dto.EditTaskCategoryRequest{}
+
+	err := c.BindJSON(&data)
+	if err != nil {
+		errResponse := utils.NewErrorResponse(c.Writer, errors.ErrInvalidRequestBody)
+		c.JSON(errResponse.Code, errResponse)
+		return
+	}
+	userData := c.MustGet("userData").(jwt.MapClaims)
+	userID := uint64(userData["user_id"].(float64))
+	taskID := c.Param("taskId")
+	TaskIDConv, _ := strconv.ParseUint(taskID, 10, 64)
+
+	res, err := cmth.ts.UpdateTaskCategory(c, TaskIDConv, userID, &data)
 	if err != nil {
 		log.Printf("[updateTask] failed to update task, id: %v, err: %v", TaskIDConv, err)
 		errResponse := utils.NewErrorResponse(c.Writer, err)

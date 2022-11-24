@@ -28,3 +28,15 @@ func (dto *EditTaskStatusRequest) ToTaskEntity() *model.TaskUserJoined {
 		},
 	}
 }
+
+type EditTaskCategoryRequest struct {
+	CategoryID uint64 `json:"category_id"`
+}
+
+func (dto *EditTaskCategoryRequest) ToTaskEntity() *model.TaskUserJoined {
+	return &model.TaskUserJoined{
+		Task: model.Task{
+			CategoryID: dto.CategoryID,
+		},
+	}
+}
