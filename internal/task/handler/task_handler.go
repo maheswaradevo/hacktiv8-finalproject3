@@ -56,7 +56,7 @@ func (cmth *TaskHandler) createTask(c *gin.Context) {
 func (cmth *TaskHandler) viewTask(c *gin.Context) {
 	res, err := cmth.ts.ViewTask(c)
 	if err != nil {
-		log.Printf("[viewComment] failed to view comment, err: %v", err)
+		log.Printf("[viewTask] failed to view task, err: %v", err)
 		errResponse := utils.NewErrorResponse(c.Writer, err)
 		c.JSON(errResponse.Code, errResponse)
 		return

@@ -21,8 +21,9 @@ func ProvideTaskRepository(db *sql.DB) *TaskImplRepo {
 var (
 	CREATE_TASK    = "INSERT INTO `tasks`(user_id, category_id, title, description) VALUES (?, ?, ?, ?);"
 	CHECK_CATEGORY = "SELECT id FROM categories;"
-	VIEW_TASK      = "SELECT t.id, t.title, t.description, t.status, t.created_at, t.updated_at, u.id, u.email, u.full_name, c.id FROM tasks t INNER JOIN `users` u ON u.id = t.user_id  INNER JOIN `categories` c ON c.id = t.category_id ORDER BY t.created_at DESC;"
+	VIEW_TASK      = "SELECT t.id, t.title, t.description, t.status, t.category_id, t.user_id, t.created_at, t.updated_at, u.email, u.full_name FROM tasks t JOIN `users` u ON u.id = t.user_id  ORDER BY t.created_at DESC;"
 	COUNT_TASK     = "SELECT COUNT(*) FROM tasks;"
+	CHECK_TASK     = "SELECT id FROM tasks WHERE user_id = ?;"
 )
 
 func (tsk TaskImplRepo) CreateTask(ctx context.Context, data model.Task) (taskID uint64, err error) {
@@ -46,7 +47,7 @@ func (tsk TaskImplRepo) CreateTask(ctx context.Context, data model.Task) (taskID
 	return taskID, nil
 }
 
-func (tsk TaskImplRepo) CheckTask(ctx context.Context, categoryID uint64) (bool, error) {
+func (tsk TaskImplRepo) CheckCategory(ctx context.Context, categoryID uint64) (bool, error) {
 	query := CHECK_CATEGORY
 	stmt, err := tsk.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -68,12 +69,12 @@ func (tsk TaskImplRepo) ViewTask(ctx context.Context) (model.PeopleTaskJoined, e
 	query := VIEW_TASK
 	stmt, err := tsk.db.PrepareContext(ctx, query)
 	if err != nil {
-		log.Printf("[ViewPhoto] failed to prepare the statement, err: %v", err)
+		log.Printf("[ViewTask] failed to prepare the statement, err: %v", err)
 		return nil, err
 	}
 	rows, err := stmt.QueryContext(ctx)
 	if err != nil {
-		log.Printf("[ViewPhoto] failed to query to the database, err: %v", err)
+		log.Printf("[ViewTask] failed to query to the database, err: %v", err)
 		return nil, err
 	}
 	var peopleTask model.PeopleTaskJoined
@@ -92,7 +93,7 @@ func (tsk TaskImplRepo) ViewTask(ctx context.Context) (model.PeopleTaskJoined, e
 			&personTask.User.FullName,
 		)
 		if err != nil {
-			log.Printf("[ViewComment] failed to scan the data from the database, err: %v", err)
+			log.Printf("[ViewTask] failed to scan the data from the database, err: %v", err)
 			return nil, err
 		}
 		peopleTask = append(peopleTask, &personTask)
@@ -110,4 +111,22 @@ func (tsk TaskImplRepo) CountTask(ctx context.Context) (int, error) {
 		return 0, err
 	}
 	return count, nil
+}
+
+func (tsk TaskImplRepo) CheckTask(ctx context.Context, userID uint64) (bool, error) {
+	query := CHECK_TASK
+	stmt, err := tsk.db.PrepareContext(ctx, query)
+	if err != nil {
+		log.Printf("[CheckTask] failed to prepare the statement, err: %v", err)
+		return false, err
+	}
+	rows, err := stmt.QueryContext(ctx, userID)
+	if err != nil {
+		log.Printf("[CheckTask] failed to query to the database, err: %v", err)
+		return false, err
+	}
+	for rows.Next() {
+		return true, nil
+	}
+	return false, nil
 }

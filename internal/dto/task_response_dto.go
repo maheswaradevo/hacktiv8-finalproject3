@@ -17,15 +17,15 @@ type CreateTaskResponse struct {
 }
 
 type ViewTaskResponse struct {
-	TaskID      uint64                   `json:"id"`
-	Title       string                   `json:"title"`
-	Description string                   `json:"description"`
-	Status      bool                   `json:"status"`
-	CategoryID  uint64                   `json:"category_id"`
-	UserID      uint64                   `json:"user_id"`
-	UpdatedAt   time.Time                `json:"updated_at"`
-	CreatedAt   time.Time                `json:"created_at"`
-	User        ViewTaskUserResponse     `json:"user"`
+	TaskID      uint64               `json:"id"`
+	Title       string               `json:"title"`
+	Description string               `json:"description"`
+	Status      bool                 `json:"status"`
+	CategoryID  uint64               `json:"category_id"`
+	UserID      uint64               `json:"user_id"`
+	UpdatedAt   time.Time            `json:"updated_at"`
+	CreatedAt   time.Time            `json:"created_at"`
+	User        ViewTaskUserResponse `json:"user"`
 }
 
 type ViewTaskUserResponse struct {
@@ -52,8 +52,8 @@ func NewViewTaskResponse(tsk model.TaskUserJoined) *ViewTaskResponse {
 		Title:       tsk.Task.Title,
 		Description: tsk.Task.Description,
 		Status:      tsk.Task.Status,
-		CategoryID:  tsk.Category.CategoryID,
-		UserID:      tsk.User.UserID,
+		CategoryID:  tsk.Task.CategoryID,
+		UserID:      tsk.Task.UserID,
 		UpdatedAt:   tsk.Task.UpdatedAt,
 		CreatedAt:   tsk.Task.CreatedAt,
 		User: ViewTaskUserResponse{
