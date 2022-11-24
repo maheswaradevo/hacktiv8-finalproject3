@@ -8,7 +8,7 @@ type CreateTaskRequest struct {
 	CategoryID uint64 `json:"category_id"`
 }
 
-func (dto *CreateTaskRequest) ToCommentEntity() (cmt *model.Task) {
+func (dto *CreateTaskRequest) ToTaskEntity() (cmt *model.Task) {
 	cmt = &model.Task{
 		Title: dto.Title,
 		Description: dto.Description,

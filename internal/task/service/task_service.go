@@ -21,7 +21,7 @@ func ProvideTaskService(repo task.TaskRepository) *TaskServiceImpl {
 }
 
 func (tsk *TaskServiceImpl) CreateTask(ctx context.Context, data *dto.CreateTaskRequest, userID uint64) (res *dto.CreateTaskResponse, err error) {
-	taskData := data.ToCommentEntity()
+	taskData := data.ToTaskEntity()
 	taskData.UserID = userID
 	validate := validator.New()
 	validateError := validate.Struct(data)
@@ -40,7 +40,7 @@ func (tsk *TaskServiceImpl) CreateTask(ctx context.Context, data *dto.CreateTask
 
 func (tsk *TaskServiceImpl) ViewTask(ctx context.Context) (dto.ViewTasksResponse, error) {
 	count, err := tsk.repo.CountTask(ctx)
-	
+
 	if err != nil {
 		log.Printf("[ViewTask] failed to count the task, err: %v", err)
 		return nil, err
@@ -56,4 +56,25 @@ func (tsk *TaskServiceImpl) ViewTask(ctx context.Context) (dto.ViewTasksResponse
 		return nil, err
 	}
 	return dto.NewViewTasksResponse(res), nil
+}
+
+func (tsk *TaskServiceImpl) DeleteTask(ctx context.Context, taskID uint64, userID uint64) (*dto.DeleteTaskResponse, error) {
+	check, err := tsk.repo.CheckTask(ctx, taskID, userID)
+	if err != nil {
+		log.Printf("[DeleteTask] failed to check task with, userID: %v, err: %v", userID, err)
+		return nil, err
+	}
+	if !check {
+		err = errors.ErrDataNotFound
+		log.Printf("[DeleteTask] no task in userID: %v", userID)
+		return nil, err
+	}
+
+	err = tsk.repo.DeleteTask(ctx, taskID, userID)
+	if err != nil {
+		log.Printf("[DeleteTask] failed to delete task, id: %v", taskID)
+		return nil, err
+	}
+	message := "Your task has been successfully deleted"
+	return dto.NewDeleteTaskResponse(message), nil
 }

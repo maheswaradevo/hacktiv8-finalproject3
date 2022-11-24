@@ -9,4 +9,5 @@ import (
 type TaskService interface {
 	CreateTask(ctx context.Context, data *dto.CreateTaskRequest, userID uint64) (res *dto.CreateTaskResponse, err error)
 	ViewTask(ctx context.Context) (dto.ViewTasksResponse, error)
+	DeleteTask(ctx context.Context, taskID uint64, userID uint64) (*dto.DeleteTaskResponse, error)
 }
