@@ -32,6 +32,7 @@ func NewUserHandler(r *gin.RouterGroup, us auth.UserService) *gin.RouterGroup {
 	userProtectedRoute := delivery.r.Group("/users", middleware.AuthMiddleware())
 	{
 		userProtectedRoute.Handle(http.MethodPut, "/update-account", delivery.updateAccount)
+		userProtectedRoute.Handle(http.MethodDelete, "/delete-account", delivery.deleteAccount)
 	}
 	return userRoute
 }
@@ -103,5 +104,19 @@ func (u *UserHandler) updateAccount(c *gin.Context) {
 		return
 	}
 	response := utils.NewSuccessResponseWriter(c.Writer, "Update Account Sukses", http.StatusOK, res)
+	c.JSON(http.StatusOK, response)
+}
+
+func (u *UserHandler) deleteAccount(c *gin.Context) {
+	userLoginData := c.MustGet("userData").(jwt.MapClaims)
+	userID := uint64(userLoginData["user_id"].(float64))
+
+	res, err := u.us.DeleteAccount(c, userID)
+	if err != nil {
+		log.Printf("[deleteAccount] failed to delete account, err: %v", err)
+		errResponse := utils.NewErrorResponse(c.Writer, err)
+		c.JSON(errResponse.Code, errResponse)
+	}
+	response := utils.NewSuccessResponseWriter(c.Writer, "Delete Account Sukses", http.StatusOK, res)
 	c.JSON(http.StatusOK, response)
 }
