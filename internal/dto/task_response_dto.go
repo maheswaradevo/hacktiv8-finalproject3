@@ -93,6 +93,7 @@ func NewEditTaskResponse(tsk model.Task, userID uint64) *EditTaskStatusResponse 
 		Title:       tsk.Title,
 		Description: tsk.Description,
 		Status:      tsk.Status,
+		CategoryID:  tsk.CategoryID,
 		UserID:      userID,
 		UpdatedAt:   time.Now(),
 	}
