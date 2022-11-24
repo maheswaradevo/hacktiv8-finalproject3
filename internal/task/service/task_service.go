@@ -37,3 +37,23 @@ func (tsk *TaskServiceImpl) CreateTask(ctx context.Context, data *dto.CreateTask
 	}
 	return dto.NewTaskCreateResponse(*taskData, userID, taskID), nil
 }
+
+func (tsk *TaskServiceImpl) ViewTask(ctx context.Context) (dto.ViewTasksResponse, error) {
+	count, err := tsk.repo.CountTask(ctx)
+	
+	if err != nil {
+		log.Printf("[ViewTask] failed to count the task, err: %v", err)
+		return nil, err
+	}
+	if count == 0 {
+		err = errors.ErrDataNotFound
+		log.Printf("[ViewTask] no data exists in the database: %v", err)
+		return nil, err
+	}
+	res, err := tsk.repo.ViewTask(ctx)
+	if err != nil {
+		log.Printf("[ViewTask] failed to view the task, err: %v", err)
+		return nil, err
+	}
+	return dto.NewViewTasksResponse(res), nil
+}

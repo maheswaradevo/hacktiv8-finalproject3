@@ -27,6 +27,7 @@ func NewTaskHandler(r *gin.RouterGroup, ts task.TaskService) *gin.RouterGroup {
 	taskProtectedRoute := delivery.r.Group("/tasks", middleware.AuthMiddleware())
 	{
 		taskProtectedRoute.Handle(http.MethodPost, "/", delivery.createTask)
+		taskProtectedRoute.Handle(http.MethodGet, "/", delivery.viewTask)
 	}
 	return taskRoute
 }
@@ -50,4 +51,16 @@ func (cmth *TaskHandler) createTask(c *gin.Context) {
 	}
 	response := utils.NewSuccessResponseWriter(c.Writer, "SUCCESS", http.StatusCreated, res)
 	c.JSON(http.StatusCreated, response)
+}
+
+func (cmth *TaskHandler) viewTask(c *gin.Context) {
+	res, err := cmth.ts.ViewTask(c)
+	if err != nil {
+		log.Printf("[viewTask] failed to view task, err: %v", err)
+		errResponse := utils.NewErrorResponse(c.Writer, err)
+		c.JSON(errResponse.Code, errResponse)
+		return
+	}
+	response := utils.NewSuccessResponseWriter(c.Writer, "SUCCESS", http.StatusOK, res)
+	c.JSON(http.StatusOK, response)
 }
