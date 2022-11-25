@@ -13,6 +13,7 @@ type TaskRepository interface {
 	ViewTask(ctx context.Context) (model.PeopleTaskJoined, error)
 	CountTask(ctx context.Context) (int, error)
 	CheckTask(ctx context.Context, taskID uint64, userID uint64) (bool, error)
+	UpdateTask(ctx context.Context, reqData model.TaskUserJoined, taskID uint64, userID uint64) error
 	UpdateTaskStatus(ctx context.Context, reqData model.TaskUserJoined, taskID uint64, userID uint64) error
 	UpdateTaskCategory(ctx context.Context, reqData model.TaskUserJoined, taskID uint64, userID uint64) error
 	DeleteTask(ctx context.Context, taskID uint64, userID uint64) error
