@@ -7,8 +7,6 @@ RUN go mod download
 
 COPY . .
 
-RUN go build ./cmd/main/main.go
+RUN go build main.go
 
 EXPOSE 8080
-
-CMD ["./main"]
