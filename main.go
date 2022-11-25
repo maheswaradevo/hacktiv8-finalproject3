@@ -17,6 +17,6 @@ func main() {
 	db := database.GetDatabase()
 
 	router.Init(r, db)
-	port := 0.0.0.0:8080
+	port := fmt.Sprintf("%s:%s", "0.0.0.0", cfg.PORT)
 	r.Run(port)
 }
