@@ -14,6 +14,10 @@ import (
 	taskHandler "github.com/maheswaradevo/hacktiv8-finalproject3/internal/task/handler"
 	taskRepository "github.com/maheswaradevo/hacktiv8-finalproject3/internal/task/repository"
 	taskService "github.com/maheswaradevo/hacktiv8-finalproject3/internal/task/service"
+
+	categoriesHandler "github.com/maheswaradevo/hacktiv8-finalproject3/internal/categories/handler"
+	categoriesRepository "github.com/maheswaradevo/hacktiv8-finalproject3/internal/categories/repository"
+	categoriesService "github.com/maheswaradevo/hacktiv8-finalproject3/internal/categories/service"
 )
 
 func Init(router *gin.Engine, db *sql.DB) {
@@ -24,6 +28,8 @@ func Init(router *gin.Engine, db *sql.DB) {
 		InitAuthModule(api, db)
 
 		InitTaskModule(api, db)
+
+		InitCategoriesModule(api, db)
 	}
 }
 
@@ -42,4 +48,10 @@ func InitTaskModule(routerGroup *gin.RouterGroup, db *sql.DB) *gin.RouterGroup {
 	taskRepository := taskRepository.ProvideTaskRepository(db)
 	taskService := taskService.ProvideTaskService(taskRepository)
 	return taskHandler.NewTaskHandler(routerGroup, taskService)
+}
+
+func InitCategoriesModule(routerGroup *gin.RouterGroup, db *sql.DB) *gin.RouterGroup {
+	categoriesRepository := categoriesRepository.ProvideCategoriesRepository(db)
+	categoriesService := categoriesService.ProvideCategoriesService(categoriesRepository)
+	return categoriesHandler.NewCategoriesHandler(routerGroup, categoriesService)
 }

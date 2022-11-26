@@ -14,9 +14,9 @@ type Task struct {
 }
 
 type TaskUserJoined struct {
-	Task     Task
-	Category Category
-	User     User
+	Task       Task
+	Categories Categories
+	User       User
 }
 
 type PeopleTaskJoined []*TaskUserJoined
