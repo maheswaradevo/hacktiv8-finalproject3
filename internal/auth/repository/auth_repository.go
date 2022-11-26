@@ -19,9 +19,11 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 }
 
 var (
-	SAVE_USER      = "INSERT INTO users(full_name, email, role, password) VALUES (?, ?, ?, ?);"
-	CHECK_EMAIL    = "SELECT id, full_name, email, password, role FROM users WHERE email = ?;"
-	UPDATE_ACCOUNT = "UPDATE users SET full_name = ?, email = ? WHERE id = ?;"
+	SAVE_USER       = "INSERT INTO users(full_name, email, role, password) VALUES (?, ?, ?, ?);"
+	CHECK_EMAIL     = "SELECT id, full_name, email, password, role FROM users WHERE email = ?;"
+	UPDATE_ACCOUNT  = "UPDATE users SET full_name = ?, email = ? WHERE id = ?;"
+	DELETE_ACCOUNT  = "DELETE FROM users WHERE id = ?;"
+	FIND_USER_BY_ID = "SELECT id FROM users WHERE id = ?;"
 )
 
 func (u UserRepository) Save(ctx context.Context, data model.User) (uint64, error) {
@@ -61,4 +63,31 @@ func (u UserRepository) UpdateAccount(ctx context.Context, data model.User, user
 		return err
 	}
 	return nil
+}
+
+func (u UserRepository) DeleteAccount(ctx context.Context, userID uint64) (string, error) {
+	query := DELETE_ACCOUNT
+
+	_, err := u.db.ExecContext(ctx, query, userID)
+	if err != nil {
+		log.Printf("[DeleteAccount] failed to delete data from the database, err : %v", err)
+		return "", err
+	}
+	msg := "Your account has been successfully deleted"
+	return msg, nil
+}
+
+func (u UserRepository) FindUserByID(ctx context.Context, userID uint64) (bool, error) {
+	query := FIND_USER_BY_ID
+
+	res, err := u.db.QueryContext(ctx, query, userID)
+	if err != nil {
+		log.Printf("[FindUserByID] failed to query to the database, err: %v", err)
+		return false, err
+	}
+
+	for res.Next() {
+		return true, nil
+	}
+	return false, err
 }
