@@ -19,6 +19,7 @@ var (
 	ErrDuplicateEntry            = errors.New("duplicate field entry")
 	ErrEmailFormat               = errors.New("wrong email format")
 	ErrMismatchedHashAndPassword = errors.New("wrong password")
+	ErrOnlyAdmin                 = errors.New("only admin can access")
 )
 
 func NewErrorData(code int, message string) dto.ErrorData {
@@ -48,4 +49,5 @@ var errorMap = map[error]dto.ErrorData{
 	ErrDuplicateEntry:            NewErrorData(http.StatusBadRequest, ErrDuplicateEntry.Error()),
 	ErrEmailFormat:               NewErrorData(http.StatusBadRequest, ErrEmailFormat.Error()),
 	ErrMismatchedHashAndPassword: NewErrorData(http.StatusBadRequest, ErrMismatchedHashAndPassword.Error()),
+	ErrOnlyAdmin:                 NewErrorData(http.StatusForbidden, ErrOnlyAdmin.Error()),
 }

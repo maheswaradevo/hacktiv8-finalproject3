@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS tasks(
     id INT NOT NULL AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
-    status BOOLEAN,
+    status BOOLEAN DEFAULT false,
     user_id INT NOT NULL,
     category_id INT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
