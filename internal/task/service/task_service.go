@@ -30,6 +30,16 @@ func (tsk *TaskServiceImpl) CreateTask(ctx context.Context, data *dto.CreateTask
 		log.Printf("[CreateTask] there's data that not through the validate process")
 		return nil, validateError
 	}
+	exists, err := tsk.repo.CheckCategory(ctx, taskData.CategoryID)
+	if err != nil {
+		log.Printf("[CreateTask] failed to check category, id: %v", taskData.CategoryID)
+		return nil, err
+	}
+	if !exists {
+		err = errors.ErrDataNotFound
+		log.Printf("[CreateTask] there's no category data with id, %v", taskData.CategoryID)
+		return nil, err
+	}
 	taskID, err := tsk.repo.CreateTask(ctx, *taskData)
 	if err != nil {
 		log.Printf("[CreateTask] failed to store user data to database: %v", err)
