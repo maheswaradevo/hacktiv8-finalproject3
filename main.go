@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/maheswaradevo/hacktiv8-finalproject3/internal/global/config"
@@ -15,6 +17,6 @@ func main() {
 	db := database.GetDatabase()
 
 	router.Init(r, db)
-	PORT := cfg.PORT
-	r.Run(":" + PORT)
+	PORT := fmt.Sprintf("%s:%s", "0.0.0.0", cfg.PORT)
+	r.Run(PORT)
 }
