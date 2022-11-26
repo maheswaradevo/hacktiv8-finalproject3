@@ -10,4 +10,6 @@ type User interface {
 	Save(ctx context.Context, data model.User) (uint64, error)
 	CheckEmail(ctx context.Context, email string) (*model.User, error)
 	UpdateAccount(ctx context.Context, data model.User, userID uint64) error
+	DeleteAccount(ctx context.Context, userID uint64) (string, error)
+	FindUserByID(ctx context.Context, userID uint64) (bool, error)
 }

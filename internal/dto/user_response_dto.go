@@ -24,6 +24,10 @@ type UserUpdateAccountResponse struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type UserDeleteAccountResponse struct {
+	Message string `json:"message"`
+}
+
 func NewUserRegisterResponse(u model.User) *UserRegisterResponse {
 	return &UserRegisterResponse{
 		UserID:    u.UserID,
@@ -43,5 +47,11 @@ func NewUserUpdateAccount(u model.User, userID uint64) *UserUpdateAccountRespons
 		FullName:  u.FullName,
 		Email:     u.Email,
 		UpdatedAt: time.Now(),
+	}
+}
+
+func NewUserDeleteAccountResponse(msg string) *UserDeleteAccountResponse {
+	return &UserDeleteAccountResponse{
+		Message: msg,
 	}
 }

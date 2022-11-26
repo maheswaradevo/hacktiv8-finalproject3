@@ -16,7 +16,7 @@ type UserSignInRequest struct {
 }
 
 type UserUpdateAccountRequest struct {
-	FullName string `json:"ful_name"`
+	FullName string `json:"full_name"`
 	Email    string `json:"email"`
 }
 
