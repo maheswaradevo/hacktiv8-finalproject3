@@ -1,6 +1,9 @@
 # Kanban Board
 
 Repository for Hacktiv8 Final Project 3. Already deployed on heroku `https://hacktiv8-fp3.herokuapp.com/api/v1/ping`
+## Admin credentials
+- Email: devopunda@kb.id
+- Password: adminkanbanboard
 
 ## Developer's Manual
 
